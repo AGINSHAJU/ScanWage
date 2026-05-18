@@ -9,6 +9,5 @@ python manage.py migrate
 
 # Create superuser automatically if environment variables are set
 if [ "$CREATE_SUPERUSER" = "True" ]; then
-    echo "Creating superuser..."
-    python manage.py createsuperuser --noinput || true
+    python create_superuser.py
 fi
