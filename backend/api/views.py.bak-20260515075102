@@ -1,0 +1,106 @@
+from rest_framework import viewsets, views, status
+from rest_framework.response import Response
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from django.db.models import Sum
+from datetime import datetime, date, timedelta
+from .models import Employee, ScanEntry, SalaryRecord
+from .serializers import EmployeeSerializer, ScanEntrySerializer, SalaryRecordSerializer
+from .permissions import IsAdminRole
+import calendar
+
+def get_working_days(year, month):
+    num_days = calendar.monthrange(year, month)[1]
+    working_days = 0
+    for day in range(1, num_days + 1):
+        if date(year, month, day).weekday() != 6: # Sunday is 6
+            working_days += 1
+    return working_days
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def dashboard_stats(request):
+    today = date.today()
+    year = today.year
+    month = today.month
+    
+    working_days = get_working_days(year, month)
+    total_target_scans = working_days * 2250
+    first_day_of_month = date(year, month, 1)
+    
+    # 1. Collective (Team) Stats
+    collective_scans = ScanEntry.objects.filter(
+        date__month=month,
+        date__year=year
+    ).aggregate(Sum('scan_count'))['scan_count__sum'] or 0
+    
+    # 2. Individual Stats (Strictly Isolated)
+    individual_scans = 0
+    # Try to find employee by user OR by username as fallback
+    employee = Employee.objects.filter(user=request.user).first()
+    if not employee:
+        employee = Employee.objects.filter(name__iexact=request.user.username).first()
+        
+    if employee:
+        individual_scans = ScanEntry.objects.filter(
+            employee=employee,
+            date__month=month,
+            date__year=year
+        ).aggregate(Sum('scan_count'))['scan_count__sum'] or 0
+    
+    # Salary Calculations
+    # Team Shared Salary (PRD Formula)
+    shared_salary = ((collective_scans / 2250) * 800) / 2
+    
+    # Personal Salary (Individual Version for isolation)
+    personal_salary = ((individual_scans / 2250) * 800)
+    
+    remaining_scans = max(0, total_target_scans - collective_scans)
+    progress_percentage = min(100, (collective_scans / total_target_scans * 100) if total_target_scans > 0 else 0)
+    
+    return Response({
+        "authenticated_username": request.user.username,
+        "is_admin": request.user.is_superuser or (employee.role == 'Admin' if employee else False),
+        "collective_scans": collective_scans,
+        "individual_scans": individual_scans,
+        "shared_salary_estimate": round(shared_salary, 2),
+        "personal_salary_estimate": round(personal_salary, 2),
+        "progress_percentage": round(progress_percentage, 1),
+        "target_scans": total_target_scans
+    }, headers={'Cache-Control': 'no-store'})
+
+class EmployeeViewSet(viewsets.ModelViewSet):
+    serializer_class = EmployeeSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_superuser:
+            return Employee.objects.all()
+        employee = Employee.objects.filter(user=user).first()
+        if employee and employee.role == 'Admin':
+            return Employee.objects.all()
+        return Employee.objects.filter(user=user)
+
+class ScanEntryViewSet(viewsets.ModelViewSet):
+    serializer_class = ScanEntrySerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        employee = Employee.objects.filter(user=user).first()
+        if user.is_superuser or (employee and employee.role == 'Admin'):
+            return ScanEntry.objects.all().order_by('-date')
+        return ScanEntry.objects.filter(employee=employee).order_by('-date') if employee else ScanEntry.objects.none()
+
+    def perform_create(self, serializer):
+        if not self.request.user.is_superuser:
+            employee = Employee.objects.filter(user=self.request.user).first()
+            serializer.save(employee=employee)
+        else:
+            serializer.save()
+
+class SalaryRecordViewSet(viewsets.ModelViewSet):
+    queryset = SalaryRecord.objects.all().order_by('-month')
+    serializer_class = SalaryRecordSerializer
+    permission_classes = [IsAuthenticated, IsAdminRole]

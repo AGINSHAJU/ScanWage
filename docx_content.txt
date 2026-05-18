@@ -1,0 +1,137 @@
+BUG REPORT & RESOLUTION GUIDE
+Critical: User Data Isolation Failure
+Bug ID
+BUG-001
+Severity
+CRITICAL
+Priority
+P0 — Fix Immediately
+Reported By
+QA / Internal Testing
+Affected Users
+All registered users (e.g. Tinku, Demo)
+Application Type
+Web Application
+Frontend
+HTML, CSS, JavaScript — hosted on Netlify
+Backend
+Python Django + Django REST Framework
+Database
+SQLite (Dev) / PostgreSQL (Prod)
+Auth
+JWT (JSON Web Tokens)
+Hosting
+Backend: Render / Railway | DB: PostgreSQL
+1. Bug Summary
+When a user enters data into the application, that data is visible to all other users on the dashboard — there is no separation between accounts. Additionally, some users (e.g. Tinku) are unable to enter data at all, suggesting a broken or missing user-context mechanism on both read and write operations.
+2. Steps to Reproduce
+Log in as User A (e.g. the Demo account).
+Enter any data — such as a form submission, record, or profile entry.
+Log out of the Demo account.
+Log in as User B (e.g. Tinku).
+Open the Dashboard.
+Observe that data entered by Demo is visible in Tinku’s dashboard.
+Attempt to enter or submit new data as Tinku.
+Observe that the submission fails or does not work correctly.
+3. Expected vs Actual Behaviour
+✅  Expected Behaviour
+❌  Actual Behaviour
+Each user sees only their own data.
+Data is scoped by authenticated user ID on every API call.
+All users can create, read, update, and delete their own records.
+Data entered by the Demo account appears in Tinku’s dashboard.
+No user-level filtering is applied — all records are returned globally.
+Tinku cannot submit or enter new data (write operations fail).
+4. Root Cause Analysis
+There are two closely related root causes, both stemming from missing user-scoping in the backend API:
+Cause A — Read Queries Not Filtered by User
+The Django views/viewsets that fetch data for the dashboard are returning all records from the database, without filtering by the currently authenticated user. This causes every user to see every other user’s data.
+Cause B — Write Operations Not Associating the Logged-in User
+When a record is created, the user field is either not being set, is being set incorrectly, or the request is being rejected because the ownership check fails. This is why Tinku cannot enter data — the backend does not correctly associate the incoming request with Tinku’s user account.
+5. Solution & Code Fixes
+Apply all of the following fixes to the Django backend. Each fix targets a specific layer of the problem.
+Fix 1 — Filter QuerySet by Authenticated User
+In your Django ViewSet or APIView, override get_queryset() to always filter records by the logged-in user:
+# views.py
+from rest_framework import viewsets, permissions
+from .models import YourModel
+from .serializers import YourModelSerializer
+class YourModelViewSet(viewsets.ModelViewSet):
+    serializer_class = YourModelSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    def get_queryset(self):
+        # Only return records belonging to the requesting user
+        return YourModel.objects.filter(user=self.request.user)
+Fix 2 — Auto-Assign User on Record Creation
+Override perform_create() so the user field is always set from the JWT token, not from the request body (which could be manipulated or missing):
+    def perform_create(self, serializer):
+        # Automatically assign the logged-in user as owner
+        serializer.save(user=self.request.user)
+Fix 3 — Add a ForeignKey User Field to Your Model
+Make sure your model has a user field linked to Django’s built-in User model. Without this, there is nowhere to store ownership:
+# models.py
+from django.db import models
+from django.contrib.auth.models import User
+class YourModel(models.Model):
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='your_records'
+    )
+    # ... your other fields ...
+    created_at = models.DateTimeField(auto_now_add=True)
+    def __str__(self):
+        return f'{self.user.username} - Record {self.id}'
+After adding or changing the model, run migrations:
+python manage.py makemigrations
+python manage.py migrate
+Fix 4 — Exclude user from Serializer Write Fields
+The user field should never come from the client. Mark it as read-only in the serializer so it cannot be spoofed:
+# serializers.py
+from rest_framework import serializers
+from .models import YourModel
+class YourModelSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = YourModel
+        fields = '__all__'
+        read_only_fields = ['user', 'created_at']
+Fix 5 — Verify JWT Authentication is Active
+Confirm your settings.py enforces JWT authentication globally, so every API endpoint requires a valid token:
+# settings.py
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+}
+Fix 6 — Frontend: Always Send the JWT Token in Requests
+On the frontend, ensure every API call includes the Authorization header with the user’s JWT token:
+// JavaScript (frontend)
+const token = localStorage.getItem('access_token');
+fetch('/api/your-endpoint/', {
+    method: 'GET',  // or POST, PUT, DELETE
+    headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+    }
+})
+.then(response => response.json())
+.then(data => console.log(data));
+6. Testing Checklist
+After applying all fixes, verify the following before deploying:
+Log in as Demo user — enter data and confirm it saves.
+Log out and log in as Tinku — confirm Demo’s data is NOT visible.
+Enter data as Tinku — confirm it saves successfully.
+Log back in as Demo — confirm Tinku’s data is NOT visible.
+Test with a third account to confirm full isolation across all users.
+Test with an expired/missing JWT token — API should return 401 Unauthorized.
+Use browser DevTools (Network tab) to confirm Authorization header is sent on every API call.
+7. Prevention & Best Practices
+Always use get_queryset() with user filtering — never return Model.objects.all() in a user-facing view.
+Always use perform_create() to assign the user from request.user — never from request.data.
+Write automated tests for data isolation between accounts before launch.
+Add Django’s IsAuthenticated permission class as the default in REST_FRAMEWORK settings.
+Never trust user IDs sent from the client; always derive identity from the verified JWT token server-side.
+Document prepared for internal engineering team.
