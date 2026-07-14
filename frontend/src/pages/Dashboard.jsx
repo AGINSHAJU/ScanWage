@@ -70,14 +70,14 @@ const Dashboard = ({ user }) => {
   const employeeCount = employeeBreakdown.length;
   const teamWageAmount = isAdmin && employeeCount > 0
     ? employeeBreakdown.reduce((total, employee) => total + Number(employee.salary || 0), 0)
-    : stats?.shared_salary_estimate;
+    : stats?.personal_salary_estimate;
   const activeWageAmount = showPersonWage
-    ? (isAdmin && selectedEmployee ? selectedEmployee.salary : stats?.personal_salary_estimate)
+    ? (isAdmin && selectedEmployee ? selectedEmployee.salary / 2 : stats?.shared_salary_estimate)
     : teamWageAmount;
   const activeWageTitle = showPersonWage ? 'Person Wage' : 'Team Wage';
   const activeWageDescription = showPersonWage
-    ? (isAdmin && selectedEmployee ? `${selectedEmployee.name} personal payout` : 'Your personal payout')
-    : 'Total team payout';
+    ? (isAdmin && selectedEmployee ? `${selectedEmployee.name} 50% split` : 'Your 50% split')
+    : 'Total generated';
 
   const showPreviousEmployee = () => {
     if (!employeeCount) return;
