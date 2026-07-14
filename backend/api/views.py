@@ -57,7 +57,10 @@ def dashboard_stats(request):
     all_month_scans = ScanEntry.objects.filter(date__month=month, date__year=year)
     user_month_scans = all_month_scans.filter(user=request.user)
     
-    # Collective total is always the sum of ALL scans in the month
+    if not is_admin:
+        all_month_scans = user_month_scans
+        
+    # Collective total is the sum of allowed scans in the month
     collective_scans = all_month_scans.aggregate(Sum('scan_count'))['scan_count__sum'] or 0
     
     # Individual total is only for the current user
