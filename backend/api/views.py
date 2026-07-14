@@ -71,7 +71,8 @@ def dashboard_stats(request):
     # Person Wage: Individual person's money (50% split of the group's earnings)
     personal_salary = shared_salary / team_member_count
 
-    remaining_scans = max(0, total_target_scans - collective_scans)
+    progress_scans = collective_scans if is_admin else individual_scans
+    remaining_scans = max(0, total_target_scans - progress_scans)
     
     # Calculate remaining working days (excluding Sundays)
     remaining_working_days = sum(
@@ -81,7 +82,7 @@ def dashboard_stats(request):
     )
     
     required_scans_per_day = math.ceil(remaining_scans / remaining_working_days) if remaining_working_days else 0
-    progress_percentage = min(100, (collective_scans / total_target_scans * 100) if total_target_scans > 0 else 0)
+    progress_percentage = min(100, (progress_scans / total_target_scans * 100) if total_target_scans > 0 else 0)
 
     # Calculate per-person breakdown for admins
     employee_breakdown = []
