@@ -64,8 +64,8 @@ const Login = ({ setUser }) => {
     <div className="relative w-full h-screen flex items-center justify-center overflow-hidden bg-[#0b0e14]">
       {/* Animated Background Mesh */}
       <div className="absolute inset-0 z-0 opacity-30">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-600 rounded-full blur-[120px] animate-pulse"></div>
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-600 rounded-full blur-[120px] animate-pulse delay-700"></div>
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-emerald-600 rounded-full blur-[120px] animate-pulse"></div>
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-green-600 rounded-full blur-[120px] animate-pulse delay-700"></div>
       </div>
 
       <motion.div 
@@ -74,7 +74,7 @@ const Login = ({ setUser }) => {
         className="z-10 w-full max-w-md p-8 glass mx-4"
       >
         <div className="flex flex-col items-center mb-8">
-          <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-500 rounded-2xl flex items-center justify-center mb-4 shadow-xl">
+          <div className="w-16 h-16 bg-gradient-to-br from-emerald-500 to-green-500 rounded-2xl flex items-center justify-center mb-4 shadow-xl">
             <LogIn className="text-white w-8 h-8" />
           </div>
           <h1 className="text-3xl font-bold gradient-text">ScanWage Pro</h1>
@@ -96,7 +96,7 @@ const Login = ({ setUser }) => {
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-10 pr-4 outline-none focus:border-blue-500/50 transition-colors"
+                className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-10 pr-4 outline-none focus:border-emerald-500/50 transition-colors"
                 placeholder="admin"
                 required
               />
@@ -111,7 +111,7 @@ const Login = ({ setUser }) => {
                 type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-10 pr-12 outline-none focus:border-blue-500/50 transition-colors"
+                className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-10 pr-12 outline-none focus:border-emerald-500/50 transition-colors"
                 placeholder="••••••••"
                 required
               />
@@ -128,7 +128,7 @@ const Login = ({ setUser }) => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 rounded-xl font-bold shadow-lg hover:shadow-blue-500/20 active:scale-[0.98] transition-all disabled:opacity-50 mt-4"
+            className="w-full bg-gradient-to-r from-emerald-600 to-green-600 text-white py-3 rounded-xl font-bold shadow-lg hover:shadow-emerald-500/20 active:scale-[0.98] transition-all disabled:opacity-50 mt-4"
           >
             {loading ? "Authenticating..." : "Sign In"}
           </button>
@@ -183,8 +183,8 @@ const Login = ({ setUser }) => {
             animate={{ opacity: 1, scale: 1 }}
             className="glass p-8 max-w-sm w-full text-center"
           >
-            <div className="w-16 h-16 bg-blue-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Mail className="text-blue-400 w-8 h-8" />
+            <div className="w-16 h-16 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Mail className="text-emerald-400 w-8 h-8" />
             </div>
             <h2 className="text-2xl font-bold mb-2">Request Access</h2>
             <p className="text-gray-400 text-sm mb-6">
@@ -192,7 +192,7 @@ const Login = ({ setUser }) => {
             </p>
             <button 
               onClick={() => setIsRequestModalOpen(false)}
-              className="w-full bg-blue-600 hover:bg-blue-500 text-white py-3 rounded-xl font-bold transition-all"
+              className="w-full bg-emerald-600 hover:bg-emerald-500 text-white py-3 rounded-xl font-bold transition-all"
             >
               Got it
             </button>

@@ -100,7 +100,7 @@ const EmployeeManagement = ({ user }) => {
         {isAdmin && (
           <button 
             onClick={() => handleOpenModal()}
-            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-6 py-2.5 rounded-xl font-bold transition-all shadow-lg shadow-blue-500/20 active:scale-[0.98]"
+            className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-2.5 rounded-xl font-bold transition-all shadow-lg shadow-emerald-500/20 active:scale-[0.98]"
           >
             <UserPlus className="w-5 h-5" />
             <span>Add Employee</span>
@@ -117,7 +117,7 @@ const EmployeeManagement = ({ user }) => {
             placeholder="Search by name or ID..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full bg-white/5 border border-white/10 rounded-xl py-2 pl-10 pr-4 outline-none focus:border-blue-500/50 transition-all"
+            className="w-full bg-white/5 border border-white/10 rounded-xl py-2 pl-10 pr-4 outline-none focus:border-emerald-500/50 transition-all"
           />
         </div>
         <div className="flex items-center gap-2 text-sm text-gray-400">
@@ -144,7 +144,7 @@ const EmployeeManagement = ({ user }) => {
                 </div>
               </div>
               <div className={`px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider ${
-                emp.role === 'Admin' ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20' : 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
+                emp.role === 'Admin' ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
               }`}>
                 {emp.role}
               </div>
@@ -166,7 +166,7 @@ const EmployeeManagement = ({ user }) => {
                 <>
                   <button 
                     onClick={() => handleOpenModal(emp)}
-                    className="p-2 text-gray-400 hover:text-blue-400 hover:bg-blue-400/10 rounded-lg transition-all"
+                    className="p-2 text-gray-400 hover:text-emerald-400 hover:bg-emerald-400/10 rounded-lg transition-all"
                     title="Edit Employee"
                   >
                     <Edit2 className="w-5 h-5" />
@@ -222,7 +222,7 @@ const EmployeeManagement = ({ user }) => {
                       type="text"
                       value={form.name}
                       onChange={(e) => setForm({ ...form, name: e.target.value })}
-                      className="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 outline-none focus:border-blue-500/50"
+                      className="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 outline-none focus:border-emerald-500/50"
                       placeholder="e.g. John Doe"
                       required
                     />
@@ -233,7 +233,7 @@ const EmployeeManagement = ({ user }) => {
                       type="text"
                       value={form.employee_id}
                       onChange={(e) => setForm({ ...form, employee_id: e.target.value })}
-                      className="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 outline-none focus:border-blue-500/50"
+                      className="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 outline-none focus:border-emerald-500/50"
                       placeholder="EMP-001"
                       required
                     />
@@ -244,7 +244,7 @@ const EmployeeManagement = ({ user }) => {
                       type="number"
                       value={form.base_salary}
                       onChange={(e) => setForm({ ...form, base_salary: e.target.value })}
-                      className="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 outline-none focus:border-blue-500/50"
+                      className="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 outline-none focus:border-emerald-500/50"
                       placeholder="800"
                       required
                     />
@@ -254,7 +254,7 @@ const EmployeeManagement = ({ user }) => {
                     <select
                       value={form.role}
                       onChange={(e) => setForm({ ...form, role: e.target.value })}
-                      className="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 outline-none focus:border-blue-500/50"
+                      className="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 outline-none focus:border-emerald-500/50"
                     >
                       <option value="Employee" className="bg-[#0b0e14]">Employee</option>
                       <option value="Manager" className="bg-[#0b0e14]">Manager</option>
@@ -266,7 +266,7 @@ const EmployeeManagement = ({ user }) => {
                     <select
                       value={form.status}
                       onChange={(e) => setForm({ ...form, status: e.target.value })}
-                      className="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 outline-none focus:border-blue-500/50"
+                      className="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 outline-none focus:border-emerald-500/50"
                     >
                       <option value="Active" className="bg-[#0b0e14]">Active</option>
                       <option value="Inactive" className="bg-[#0b0e14]">Inactive</option>
@@ -284,7 +284,7 @@ const EmployeeManagement = ({ user }) => {
                   </button>
                   <button
                     type="submit"
-                    className="flex-1 bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-xl font-bold transition-all shadow-lg shadow-blue-500/20"
+                    className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-3 rounded-xl font-bold transition-all shadow-lg shadow-emerald-500/20"
                   >
                     {editingId ? 'Update Profile' : 'Add Employee'}
                   </button>

@@ -2,6 +2,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -9,8 +10,7 @@ from google.oauth2 import id_token
 from google.auth.transport import requests
 from .models import Employee
 
-# Placeholder Client ID - user must replace this
-GOOGLE_CLIENT_ID = "YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com"
+GOOGLE_CLIENT_ID = getattr(settings, 'GOOGLE_CLIENT_ID', '')
 
 def get_tokens_for_user(user):
     refresh = RefreshToken.for_user(user)
@@ -49,11 +49,16 @@ def login_view(request):
 def google_login_view(request):
     token = request.data.get('token')
     
-    # DEV MODE: If token is 'dev_mode', simulate a user
-    if token == 'dev_mode':
+    # DEV MODE: only allow simulated login during local development.
+    if token == 'dev_mode' and settings.DEBUG:
         email = "devuser@example.com"
         name = "Dev User"
+    elif token == 'dev_mode':
+        return Response({"detail": "Development login is disabled"}, status=status.HTTP_401_UNAUTHORIZED)
     else:
+        if not GOOGLE_CLIENT_ID:
+            return Response({"detail": "Google login is not configured"}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+
         try:
             idinfo = id_token.verify_oauth2_token(token, requests.Request(), GOOGLE_CLIENT_ID)
             email = idinfo['email']

@@ -1,0 +1,7 @@
+{
+  "name": "scanwage",
+  "private": true,
+  "scripts": {
+    "build": "npm --prefix frontend ci && npm --prefix frontend run build && node scripts/copy-frontend-dist.mjs"
+  }
+}

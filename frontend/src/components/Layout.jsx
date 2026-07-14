@@ -1,6 +1,7 @@
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
 import { LayoutDashboard, ClipboardList, Users, LogOut, ShieldCheck, Menu, X } from 'lucide-react';
 import { useState } from 'react';
+import { API_ORIGIN } from '../api';
 
 const Layout = ({ user, setUser }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -27,13 +28,13 @@ const Layout = ({ user, setUser }) => {
     <div className="flex h-screen bg-[#0b0e14] text-white overflow-hidden">
       {/* Sidebar */}
       <aside className={`
-        fixed inset-y-0 left-0 z-50 w-64 glass-dark border-r border-white/5 transform transition-transform duration-300 ease-in-out
+        fixed inset-y-0 left-0 z-50 w-64 bg-[#0b0e14] shadow-[4px_0_24px_rgba(0,0,0,0.5)] border-r border-white/5 transform transition-transform duration-300 ease-in-out
         ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
         lg:relative lg:translate-x-0
       `}>
         <div className="p-6">
           <div className="flex items-center gap-3 mb-10">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-xl flex items-center justify-center shadow-lg">
+            <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-green-500 rounded-xl flex items-center justify-center shadow-lg">
               <ShieldCheck className="w-6 h-6" />
             </div>
             <h2 className="text-xl font-bold gradient-text">ScanWage</h2>
@@ -49,7 +50,7 @@ const Layout = ({ user, setUser }) => {
                   to={item.path}
                   className={`
                     flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200
-                    ${isActive ? 'bg-blue-500/10 text-blue-400' : 'text-gray-400 hover:bg-white/5 hover:text-white'}
+                    ${isActive ? 'bg-emerald-500/10 text-emerald-400' : 'text-gray-400 hover:bg-white/5 hover:text-white'}
                   `}
                 >
                   <Icon className="w-5 h-5" />
@@ -61,7 +62,7 @@ const Layout = ({ user, setUser }) => {
             {/* Admin Panel Link (RBAC) */}
             {isAdmin && (
               <a
-                href="http://127.0.0.1:8001/admin/"
+                href={`${API_ORIGIN}/admin/`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:bg-white/5 hover:text-white transition-all duration-200"
